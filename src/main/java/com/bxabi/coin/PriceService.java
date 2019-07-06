@@ -2,6 +2,7 @@ package com.bxabi.coin;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,18 +21,18 @@ import com.bxabi.coin.data.CoinList;
 @Component
 public class PriceService {
 
-	private CoinList coinList;
-
 	private Map<String, CoinData> mapping = new TreeMap<>();
+
+	private Date lastUpdated;
 
 	public PriceService() {
 		loadPrices();
 	}
 
-	public void loadPrices() {
+	private void loadPrices() {
 		Map<String, String> params = new HashMap<>();
 		params.put("limit", "200");
-		params.put("convert", "EUR,YEN");
+		// params.put("convert", "EUR"); // ,YEN,etc
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("X-CMC_PRO_API_KEY", "***");
@@ -40,13 +41,18 @@ public class PriceService {
 		ResponseEntity<CoinList> response = new RestTemplate().exchange(
 				"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", HttpMethod.GET, entity,
 				CoinList.class, params);
-		coinList = response.getBody();
+		CoinList coinList = response.getBody();
 
-		for (CoinData coinData : coinList.getData()) {
-			mapping.put(coinData.getSymbol(), coinData);
+		synchronized (mapping) {
+			mapping.clear();
+			for (CoinData coinData : coinList.getData()) {
+				mapping.put(coinData.getSymbol(), coinData);
+			}
 		}
+
+		lastUpdated = new Date();
 	}
-	
+
 	public BigDecimal convertToUsd(BigDecimal toConvert, String from) {
 		if (from.equals("USD"))
 			return toConvert;
@@ -64,10 +70,26 @@ public class PriceService {
 	}
 
 	private BigDecimal getRate(String from, String string) {
-		return mapping.get(from).getQuotes().get(string).getPrice();
+		synchronized (mapping) {
+			return mapping.get(from).getQuotes().get(string).getPrice();
+		}
 	}
 
 	public Set<String> getCoinList() {
-		return mapping.keySet();
+		synchronized (mapping) {
+			return mapping.keySet();
+		}
+	}
+
+	public Date getLastUpdated() {
+		return lastUpdated;
+	}
+
+	public void refreshPrice() {
+		Date now = new Date();
+		// last update was more than a minute ago
+		if (now.getTime() - lastUpdated.getTime() > 60000) {
+			loadPrices();
+		}
 	}
 }
