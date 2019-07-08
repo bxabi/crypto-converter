@@ -109,7 +109,8 @@ public class MainView extends VerticalLayout {
 		rows.add(new HorizontalLayout(n1, c1));
 	}
 
-	class NumberChangeListener implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, String>> {
+	private class NumberChangeListener
+			implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, String>> {
 
 		private static final long serialVersionUID = 9192684297366604945L;
 

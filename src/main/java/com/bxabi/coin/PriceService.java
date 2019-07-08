@@ -26,7 +26,7 @@ public class PriceService {
 	private Date lastUpdated;
 
 	public PriceService() {
-		loadPrices();
+		// loadPrices();
 	}
 
 	private void loadPrices() {
@@ -88,7 +88,7 @@ public class PriceService {
 	public void refreshPrice() {
 		Date now = new Date();
 		// last update was more than a minute ago
-		if (now.getTime() - lastUpdated.getTime() > 60000) {
+		if (lastUpdated == null || now.getTime() - lastUpdated.getTime() > 60000) {
 			loadPrices();
 		}
 	}
