@@ -23,7 +23,7 @@ public class CryptoConverterApplication {
 		filter.setIncludeQueryString(true);
 		filter.setIncludePayload(true);
 		filter.setIncludeHeaders(true);
-		
+
 		return filter;
 	}
 

@@ -15,6 +15,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.FocusNotifier;
 import com.vaadin.flow.component.FocusNotifier.FocusEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Footer;
@@ -25,10 +26,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.InitialPageSettings;
+import com.vaadin.flow.server.PageConfigurator;
 
 @Route
-public class MainView extends VerticalLayout {
+@PageTitle("Online Cryptocurrency Converter")
+public class MainView extends VerticalLayout implements PageConfigurator {
 
 	private PriceService priceService;
 
@@ -44,6 +49,11 @@ public class MainView extends VerticalLayout {
 	private static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 	static {
 		DATEFORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
+
+	@Override
+	public void configurePage(InitialPageSettings settings) {
+		settings.addFavIcon("icon", "exchange.svg", "");
 	}
 
 	private static ComponentEventListener<FocusEvent<ComboBox<String>>> focusListener = new ComponentEventListener<FocusNotifier.FocusEvent<ComboBox<String>>>() {
@@ -89,6 +99,10 @@ public class MainView extends VerticalLayout {
 		Footer footer = new Footer();
 		footer.add(new Paragraph("Last price update: " + DATEFORMAT.format(priceService.getLastUpdated())));
 		footer.add(new Paragraph("Made using Spring Boot and Vaadin. Prices from CoinMarketCap."));
+		footer.add(new Html(
+				"<div>Icons made by <a href=\"https://www.freepik.com/\" title=\"Freepik\">Freepik</a> from <a href=\"https://www.flaticon.com/\""
+						+ "      title=\"Flaticon\">www.flaticon.com</a> is licensed by <a href=\"http://creativecommons.org/licenses/by/3.0/\"       "
+						+ "          title=\"Creative Commons BY 3.0\" target=\"_blank\">CC 3.0 BY</a></div>"));
 		add(footer);
 	}
 
