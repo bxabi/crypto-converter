@@ -85,16 +85,11 @@ public class PriceService {
 		return lastUpdated;
 	}
 
-	public void refreshPrice() {
+	public void refreshPrices() {
 		Date now = new Date();
 		// last update was more than a minute ago
 		if (lastUpdated == null || now.getTime() - lastUpdated.getTime() > 60000) {
-			new Thread() {
-				@Override
-				public void run() {
-					loadPrices();
-				};
-			}.start();
+			loadPrices();
 		}
 	}
 }

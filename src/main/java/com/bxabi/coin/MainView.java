@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
@@ -37,6 +39,7 @@ import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.PageConfigurator;
 
 @PWA(name = "CryptoCurrency Converter", shortName = "Crypto Conv.", iconPath = "exchange.png", enableInstallPrompt = false)
+@Push
 
 @Route
 @PageTitle("Online CryptoCurrency Converter")
@@ -52,6 +55,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	private int activeRow;
 
 	private Div rows;
+
+	private Paragraph lastPriceUpdate = new Paragraph();
 
 	private static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 	static {
@@ -78,7 +83,6 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 	public MainView(@Autowired PriceService priceService) {
 		this.priceService = priceService;
-		priceService.refreshPrice();
 
 		add(new H2("Online Cryptocurrency Converter for the top 200 coins"));
 
@@ -111,7 +115,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	private void addFooter() {
 		Footer footer = new Footer();
 
-		footer.add(new Paragraph("Last price update: " + DATEFORMAT.format(priceService.getLastUpdated())));
+		lastPriceUpdate.setText(getLastPriceUpdateText());
+		footer.add(lastPriceUpdate);
 
 		addContact(footer);
 
@@ -177,6 +182,20 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		rows.add(new HorizontalLayout(n1, c1));
 	}
 
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		new Thread(() -> {
+			priceService.refreshPrices();
+			attachEvent.getUI().access(() -> {
+				lastPriceUpdate.setText(getLastPriceUpdateText());
+			});
+		}).start();
+	}
+
+	private String getLastPriceUpdateText() {
+		return "Last price update: " + DATEFORMAT.format(priceService.getLastUpdated());
+	}
+
 	private class NumberChangeListener
 			implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, ?>> {
 
@@ -195,6 +214,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 			if (event.getSource() instanceof NumberField) {
 				activeRow = id;
 			}
+
+			lastPriceUpdate.setText(getLastPriceUpdateText());
 
 			Double value = numbers.get(activeRow).getValue();
 			// if (value == null)
