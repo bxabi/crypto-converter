@@ -16,35 +16,42 @@ import com.vaadin.flow.component.FocusNotifier;
 import com.vaadin.flow.component.FocusNotifier.FocusEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InitialPageSettings;
+import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.PageConfigurator;
 
+@PWA(name = "CryptoCurrency Converter", shortName = "Crypto Conv.", iconPath = "exchange.png", enableInstallPrompt = false)
+
 @Route
-@PageTitle("Online Cryptocurrency Converter")
+@PageTitle("Online CryptoCurrency Converter")
 public class MainView extends VerticalLayout implements PageConfigurator {
 
 	private PriceService priceService;
 
 	private static final long serialVersionUID = -4061880784472661873L;
 
-	private List<TextField> numbers;
+	private List<NumberField> numbers;
 	private List<ComboBox<String>> combos;
 
 	private int activeRow;
 
-	private VerticalLayout rows;
+	private Div rows;
 
 	private static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 	static {
@@ -53,7 +60,11 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 	@Override
 	public void configurePage(InitialPageSettings settings) {
+		settings.addMetaTag("description", "Online Cryptocurrency Converter");
+
 		settings.addFavIcon("icon", "exchange.svg", "");
+		settings.addFavIcon("icon", "exchange-512x512.png", "");
+		settings.addFavIcon("icon", "exchange-512x512.png", "512x512");
 	}
 
 	private static ComponentEventListener<FocusEvent<ComboBox<String>>> focusListener = new ComponentEventListener<FocusNotifier.FocusEvent<ComboBox<String>>>() {
@@ -66,18 +77,16 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	};
 
 	public MainView(@Autowired PriceService priceService) {
+		this.priceService = priceService;
 		priceService.refreshPrice();
 
 		add(new H2("Online Cryptocurrency Converter for the top 200 coins"));
 
-		this.priceService = priceService;
-
 		numbers = new ArrayList<>();
 		combos = new ArrayList<>();
 
-		rows = new VerticalLayout();
+		rows = new Div();
 		add(rows);
-
 		addRow("USDT");
 		addRow("BTC");
 		addRow("ETH");
@@ -96,19 +105,64 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		add(new H3("The page is under development, use it at your own risk."));
 
+		addFooter();
+	}
+
+	private void addFooter() {
 		Footer footer = new Footer();
+
 		footer.add(new Paragraph("Last price update: " + DATEFORMAT.format(priceService.getLastUpdated())));
-		footer.add(new Paragraph("Made using Spring Boot and Vaadin. Prices from CoinMarketCap."));
+
+		addContact(footer);
+
+		// references
+		Paragraph paragraph = new Paragraph("Made with ");
+		Anchor spring = new Anchor("https://spring.io/projects/spring-boot", "Spring Boot");
+		spring.setTarget("_blank");
+		paragraph.add(spring);
+		paragraph.add(new Text(" and "));
+		Anchor vaadin = new Anchor("https://vaadin.com/flow", "Vaadin Flow");
+		vaadin.setTarget("_blank");
+		paragraph.add(vaadin);
+		paragraph.add(new Text(". Prices from "));
+		Anchor cmc = new Anchor("https://pro.coinmarketcap.com/", "CoinMarketCap API");
+		cmc.setTarget("_blank");
+		paragraph.add(cmc);
+		footer.add(paragraph);
+
 		footer.add(new Html(
-				"<div>Icons made by <a href=\"https://www.freepik.com/\" title=\"Freepik\">Freepik</a> from <a href=\"https://www.flaticon.com/\""
+				"<p>Icon made by <a target='_blank' href=\"https://www.freepik.com/\" title=\"Freepik\">Freepik</a> from <a target='_blank' href=\"https://www.flaticon.com/\""
 						+ "      title=\"Flaticon\">www.flaticon.com</a> is licensed by <a href=\"http://creativecommons.org/licenses/by/3.0/\"       "
-						+ "          title=\"Creative Commons BY 3.0\" target=\"_blank\">CC 3.0 BY</a></div>"));
+						+ "          title=\"Creative Commons BY 3.0\" target=\"_blank\">CC 3.0 BY</a></p>"));
 		add(footer);
 	}
 
+	private void addContact(Footer footer) {
+		Text contactLabel = new Text("For improvements, suggesions, bugs, support, write to: ");
+		Anchor link = new Anchor("mailto:csabi@bxabi.com", "csabi@bxabi.com");
+		Button emailbutton = new Button("Show email");
+		H4 contact = new H4(contactLabel, emailbutton);
+		footer.add(contact);
+
+		ComponentEventListener<ClickEvent<Button>> emailListener = new ComponentEventListener<ClickEvent<Button>>() {
+			private static final long serialVersionUID = -3293472377300681191L;
+
+			@Override
+			public void onComponentEvent(ClickEvent<Button> event) {
+				contact.remove(emailbutton);
+				contact.add(link);
+			}
+		};
+		emailbutton.addClickListener(emailListener);
+	}
+
 	private void addRow(String coin) {
-		TextField n1 = new TextField();
+		NumberField n1 = new NumberField();
 		n1.setValueChangeMode(ValueChangeMode.EAGER);
+		n1.setStep(0.000000000000000001);
+		n1.setPreventInvalidInput(true);
+		n1.setClearButtonVisible(true);
+		// n1.setAutoselect(true); //gives a red error right on the right side
 		numbers.add(n1);
 
 		ComboBox<String> c1 = new ComboBox<>(10);
@@ -124,7 +178,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	}
 
 	private class NumberChangeListener
-			implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, String>> {
+			implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, ?>> {
 
 		private static final long serialVersionUID = 9192684297366604945L;
 
@@ -135,14 +189,17 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		}
 
 		@Override
-		public void valueChanged(ComponentValueChangeEvent<? extends Component, String> event) {
+		public void valueChanged(ComponentValueChangeEvent<? extends Component, ?> event) {
 			if (!event.isFromClient())
 				return;
-			if (event.getSource() instanceof TextField) {
+			if (event.getSource() instanceof NumberField) {
 				activeRow = id;
 			}
 
-			BigDecimal toConvert = new BigDecimal(numbers.get(activeRow).getValue());
+			Double value = numbers.get(activeRow).getValue();
+			// if (value == null)
+			// value = 0d;
+			BigDecimal toConvert = new BigDecimal(value);
 			String from = combos.get(activeRow).getValue();
 			for (int i = 0; i < numbers.size(); i++) {
 				if (i == activeRow)
@@ -153,7 +210,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 				BigDecimal inBtc = priceService.convertToUsd(toConvert, from);
 				BigDecimal converted = priceService.convertFromUsd(inBtc, to);
 
-				numbers.get(i).setValue(converted.toString());
+				numbers.get(i).setValue(converted.doubleValue());
 			}
 		}
 	};
