@@ -34,3 +34,8 @@ mvnw
 mvnw.cmd
 .mvn
 /deploy.sh
+/node_modules/
+/package-lock.json
+/package.json
+/webpack.config.js
+/webpack.generated.js

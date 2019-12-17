@@ -91,9 +91,13 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		rows = new Div();
 		add(rows);
+		NumberField numField = addRow("BTC");
 		addRow("USDT");
-		addRow("BTC");
 		addRow("ETH");
+
+		numField.setValue(1d);
+		activeRow=0;
+		calculateValues();
 
 		Button button = new Button("Add more");
 		ComponentEventListener<ClickEvent<Button>> listener = new ComponentEventListener<ClickEvent<Button>>() {
@@ -161,13 +165,13 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		emailbutton.addClickListener(emailListener);
 	}
 
-	private void addRow(String coin) {
+	private NumberField addRow(String coin) {
 		NumberField n1 = new NumberField();
 		n1.setValueChangeMode(ValueChangeMode.EAGER);
 		n1.setStep(0.000000000000000001);
 		n1.setPreventInvalidInput(true);
 		n1.setClearButtonVisible(true);
-		// n1.setAutoselect(true); //gives a red error right on the right side
+		n1.setAutoselect(true);
 		numbers.add(n1);
 
 		ComboBox<String> c1 = new ComboBox<>(10);
@@ -180,6 +184,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		c1.addValueChangeListener(new NumberChangeListener(combos.size() - 1));
 
 		rows.add(new HorizontalLayout(n1, c1));
+		return n1;
 	}
 
 	@Override
@@ -215,24 +220,29 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 				activeRow = id;
 			}
 
-			lastPriceUpdate.setText(getLastPriceUpdateText());
-
-			Double value = numbers.get(activeRow).getValue();
-			// if (value == null)
-			// value = 0d;
-			BigDecimal toConvert = new BigDecimal(value);
-			String from = combos.get(activeRow).getValue();
-			for (int i = 0; i < numbers.size(); i++) {
-				if (i == activeRow)
-					continue;
-
-				String to = combos.get(i).getValue();
-
-				BigDecimal inBtc = priceService.convertToUsd(toConvert, from);
-				BigDecimal converted = priceService.convertFromUsd(inBtc, to);
-
-				numbers.get(i).setValue(converted.doubleValue());
-			}
+			calculateValues();
 		}
 	};
+
+	private void calculateValues() {
+		lastPriceUpdate.setText(getLastPriceUpdateText());
+
+		Double value = numbers.get(activeRow).getValue();
+		if (value == null) {
+			return;
+		}
+		BigDecimal toConvert = new BigDecimal(value);
+		String from = combos.get(activeRow).getValue();
+		for (int i = 0; i < numbers.size(); i++) {
+			if (i == activeRow)
+				continue;
+
+			String to = combos.get(i).getValue();
+
+			BigDecimal inBtc = priceService.convertToUsd(toConvert, from);
+			BigDecimal converted = priceService.convertFromUsd(inBtc, to);
+
+			numbers.get(i).setValue(converted.doubleValue());
+		}
+	}
 }
