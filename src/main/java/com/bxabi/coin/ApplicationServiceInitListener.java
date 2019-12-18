@@ -8,7 +8,6 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.ServiceInitEvent;
@@ -17,7 +16,8 @@ import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinSession;
 
-@Component
+//@Component
+@Deprecated // probably not needed with the new vaadin
 public class ApplicationServiceInitListener implements VaadinServiceInitListener {
 	private static final long serialVersionUID = -3387989951492682246L;
 
