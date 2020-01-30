@@ -24,7 +24,6 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -111,8 +110,6 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		button.addClickListener(listener);
 		add(button);
 
-		add(new H3("The page is under development, use it at your own risk."));
-
 		addFooter();
 	}
 
@@ -144,6 +141,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 						+ "      title=\"Flaticon\">www.flaticon.com</a> is licensed by <a href=\"http://creativecommons.org/licenses/by/3.0/\"       "
 						+ "          title=\"Creative Commons BY 3.0\" target=\"_blank\">CC 3.0 BY</a></p>"));
 		add(footer);
+
+		add(new H4("The page is under development, use it at your own risk."));
 	}
 
 	private void addContact(Footer footer) {
@@ -183,7 +182,14 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		n1.addValueChangeListener(new NumberChangeListener(numbers.size() - 1));
 		c1.addValueChangeListener(new NumberChangeListener(combos.size() - 1));
 
-		rows.add(new HorizontalLayout(n1, c1));
+		// n1.setMaxWidth("180px");
+		n1.setWidth("180px");
+		// n1.setMinWidth("120px");
+		c1.setWidth("120px");
+
+		HorizontalLayout hl = new HorizontalLayout(n1, c1);
+		// hl.setMaxWidth("300px");
+		rows.add(hl);
 		return n1;
 	}
 
