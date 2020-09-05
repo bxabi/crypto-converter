@@ -83,7 +83,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	public MainView(@Autowired PriceService priceService) {
 		this.priceService = priceService;
 
-		add(new H2("Online Cryptocurrency Converter for the top 200 coins"));
+		add(new H2("Online Cryptocurrency Converter for the top 500 coins"));
 
 		numbers = new ArrayList<>();
 		combos = new ArrayList<>();
@@ -168,7 +168,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		NumberField n1 = new NumberField();
 		n1.setValueChangeMode(ValueChangeMode.EAGER);
 		n1.setStep(0.000000000000000001);
-		n1.setPreventInvalidInput(true);
+		// n1.setPreventInvalidInput(true);
 		n1.setClearButtonVisible(true);
 		n1.setAutoselect(true);
 		numbers.add(n1);

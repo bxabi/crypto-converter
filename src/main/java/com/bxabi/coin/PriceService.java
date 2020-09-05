@@ -2,8 +2,8 @@ package com.bxabi.coin;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -11,9 +11,12 @@ import java.util.TreeMap;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bxabi.coin.data.CoinData;
 import com.bxabi.coin.data.CoinList;
@@ -30,21 +33,26 @@ public class PriceService {
 	}
 
 	private void loadPrices() {
-		Map<String, String> params = new HashMap<>();
-		params.put("limit", "200");
-		// params.put("convert", "EUR"); // ,YEN,etc
+		final RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("X-CMC_PRO_API_KEY", "***");
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
-		ResponseEntity<CoinList> response = new RestTemplate().exchange(
-				"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", HttpMethod.GET, entity,
-				CoinList.class, params);
-		CoinList coinList = response.getBody();
+
+		UriComponents uri = UriComponentsBuilder
+				.fromHttpUrl("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest")
+				.queryParam("limit", 500).build();
+		// .queryParam("convert", "EUR"); // ,YEN,etc
+
+		ResponseEntity<CoinList> response = restTemplate.exchange(uri.toUriString(), HttpMethod.GET, entity,
+				CoinList.class);
 
 		synchronized (mapping) {
 			mapping.clear();
+			CoinList coinList = response.getBody();
 			for (CoinData coinData : coinList.getData()) {
 				mapping.put(coinData.getSymbol(), coinData);
 			}
