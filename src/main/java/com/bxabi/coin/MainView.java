@@ -90,11 +90,12 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		rows = new Div();
 		add(rows);
-		NumberField numField = addRow("BTC");
-		addRow("USDT");
-		addRow("ETH");
+		// NumberField numField =
+		addRow("BTC", 1d);
+		addRow("USDT", null);
+		addRow("ETH", null);
 
-		numField.setValue(1d);
+		// numField.setValue(1d);
 		activeRow=0;
 		// calculateValues();
 
@@ -104,7 +105,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 			@Override
 			public void onComponentEvent(ClickEvent<Button> event) {
-				addRow("");
+				addRow("", null);
 			}
 		};
 		button.addClickListener(listener);
@@ -164,7 +165,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		emailbutton.addClickListener(emailListener);
 	}
 
-	private NumberField addRow(String coin) {
+	private NumberField addRow(String coin, Double value) {
 		NumberField n1 = new NumberField();
 		n1.setValueChangeMode(ValueChangeMode.EAGER);
 		n1.setStep(0.000000000000000001);
@@ -186,6 +187,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		n1.setWidth("180px");
 		// n1.setMinWidth("120px");
 		c1.setWidth("120px");
+
+		n1.setValue(value);
 
 		HorizontalLayout hl = new HorizontalLayout(n1, c1);
 		// hl.setMaxWidth("300px");
@@ -231,15 +234,14 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	};
 
 	private void calculateValues() {
-		// new Thread(() -> {
 		priceService.refreshPrices();
-		// }).start();
 		lastPriceUpdate.setText(getLastPriceUpdateText());
 
 		Double value = numbers.get(activeRow).getValue();
 		if (value == null) {
 			return;
 		}
+
 		BigDecimal toConvert = new BigDecimal(value);
 		String from = combos.get(activeRow).getValue();
 		for (int i = 0; i < numbers.size(); i++) {
