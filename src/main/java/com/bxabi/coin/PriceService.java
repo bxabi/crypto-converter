@@ -29,7 +29,16 @@ public class PriceService {
 	private Date lastUpdated;
 
 	public PriceService() {
-		loadPrices();
+		refreshPrices();
+	}
+
+	public synchronized void refreshPrices() {
+		Date now = new Date();
+		// last update was more than a minute ago
+		if (lastUpdated == null || now.getTime() - lastUpdated.getTime() > 60000) {
+			loadPrices();
+			lastUpdated = new Date();
+		}
 	}
 
 	private void loadPrices() {
@@ -57,8 +66,6 @@ public class PriceService {
 				mapping.put(coinData.getSymbol(), coinData);
 			}
 		}
-
-		lastUpdated = new Date();
 	}
 
 	public BigDecimal convertToUsd(BigDecimal toConvert, String from) {
@@ -91,13 +98,5 @@ public class PriceService {
 
 	public Date getLastUpdated() {
 		return lastUpdated;
-	}
-
-	public void refreshPrices() {
-		Date now = new Date();
-		// last update was more than a minute ago
-		if (lastUpdated == null || now.getTime() - lastUpdated.getTime() > 60000) {
-			loadPrices();
-		}
 	}
 }

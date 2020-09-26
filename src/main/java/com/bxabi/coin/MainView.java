@@ -96,7 +96,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		numField.setValue(1d);
 		activeRow=0;
-		calculateValues();
+		// calculateValues();
 
 		Button button = new Button("Add more");
 		ComponentEventListener<ClickEvent<Button>> listener = new ComponentEventListener<ClickEvent<Button>>() {
@@ -198,7 +198,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		new Thread(() -> {
 			priceService.refreshPrices();
 			attachEvent.getUI().access(() -> {
-				lastPriceUpdate.setText(getLastPriceUpdateText());
+				calculateValues();
 			});
 		}).start();
 	}
@@ -222,15 +222,18 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		public void valueChanged(ComponentValueChangeEvent<? extends Component, ?> event) {
 			if (!event.isFromClient())
 				return;
+
 			if (event.getSource() instanceof NumberField) {
 				activeRow = id;
 			}
-
 			calculateValues();
 		}
 	};
 
 	private void calculateValues() {
+		// new Thread(() -> {
+		priceService.refreshPrices();
+		// }).start();
 		lastPriceUpdate.setText(getLastPriceUpdateText());
 
 		Double value = numbers.get(activeRow).getValue();
