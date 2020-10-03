@@ -198,12 +198,13 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-		new Thread(() -> {
-			priceService.refreshPrices();
-			attachEvent.getUI().access(() -> {
-				calculateValues();
-			});
-		}).start();
+		calculateValues();
+		// new Thread(() -> {
+		// priceService.refreshPrices();
+		// attachEvent.getUI().access(() -> {
+		// calculateValues();
+		// });
+		// }).start();
 	}
 
 	private String getLastPriceUpdateText() {
