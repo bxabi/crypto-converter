@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CoinData {
+public class CoinDataCMC {
 	private String name;
 	private String symbol;
 	private String slug;

@@ -18,17 +18,17 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bxabi.coin.data.CoinData;
-import com.bxabi.coin.data.CoinList;
+import com.bxabi.coin.data.CoinDataCMC;
+import com.bxabi.coin.data.CoinListCMC;
 
 @Component
-public class PriceService {
+public class PriceServiceCMC {
 
-	private Map<String, CoinData> mapping = new TreeMap<>();
+	private Map<String, CoinDataCMC> mapping = new TreeMap<>();
 
 	private Date lastUpdated;
 
-	public PriceService() {
+	public PriceServiceCMC() {
 		refreshPrices();
 	}
 
@@ -56,13 +56,13 @@ public class PriceService {
 				.queryParam("limit", 500).build();
 		// .queryParam("convert", "EUR"); // ,YEN,etc
 
-		ResponseEntity<CoinList> response = restTemplate.exchange(uri.toUriString(), HttpMethod.GET, entity,
-				CoinList.class);
+		ResponseEntity<CoinListCMC> response = restTemplate.exchange(uri.toUriString(), HttpMethod.GET, entity,
+				CoinListCMC.class);
 
 		synchronized (mapping) {
 			mapping.clear();
-			CoinList coinList = response.getBody();
-			for (CoinData coinData : coinList.getData()) {
+			CoinListCMC coinList = response.getBody();
+			for (CoinDataCMC coinData : coinList.getData()) {
 				mapping.put(coinData.getSymbol(), coinData);
 			}
 		}

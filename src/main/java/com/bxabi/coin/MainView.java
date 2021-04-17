@@ -44,7 +44,7 @@ import com.vaadin.flow.server.PageConfigurator;
 @PageTitle("Online CryptoCurrency Converter")
 public class MainView extends VerticalLayout implements PageConfigurator {
 
-	private PriceService priceService;
+	private PriceServiceCG priceService;
 
 	private static final long serialVersionUID = -4061880784472661873L;
 
@@ -80,10 +80,10 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		}
 	};
 
-	public MainView(@Autowired PriceService priceService) {
+	public MainView(@Autowired PriceServiceCG priceService) {
 		this.priceService = priceService;
 
-		add(new H2("Online Cryptocurrency Converter for the top 500 coins"));
+		add(new H2("Online Cryptocurrency Converter"));
 
 		numbers = new ArrayList<>();
 		combos = new ArrayList<>();
@@ -93,6 +93,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		// NumberField numField =
 		addRow("BTC", 1d);
 		addRow("USDT", null);
+		addRow("EURX", null);
 		addRow("ETH", null);
 
 		// numField.setValue(1d);
@@ -132,7 +133,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		vaadin.setTarget("_blank");
 		paragraph.add(vaadin);
 		paragraph.add(new Text(". Prices from "));
-		Anchor cmc = new Anchor("https://pro.coinmarketcap.com/", "CoinMarketCap API");
+		Anchor cmc = new Anchor("https://www.coingecko.com/en/api", "CoinGecko API");
 		cmc.setTarget("_blank");
 		paragraph.add(cmc);
 		footer.add(paragraph);
@@ -208,7 +209,10 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	}
 
 	private String getLastPriceUpdateText() {
-		return "Last price update: " + DATEFORMAT.format(priceService.getLastUpdated());
+		if (priceService.getLastUpdated() != null)
+			return "Last price update: " + DATEFORMAT.format(priceService.getLastUpdated());
+		else
+			return "";
 	}
 
 	private class NumberChangeListener
@@ -235,7 +239,11 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 	};
 
 	private void calculateValues() {
-		priceService.refreshPrices();
+		List<String> coins = new ArrayList<>();
+		for (int i = 0; i < numbers.size(); i++) {
+			coins.add(combos.get(i).getValue());
+		}
+		priceService.refreshPrices(coins);
 		lastPriceUpdate.setText(getLastPriceUpdateText());
 
 		Double value = numbers.get(activeRow).getValue();
@@ -245,14 +253,14 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		BigDecimal toConvert = new BigDecimal(value);
 		String from = combos.get(activeRow).getValue();
+		BigDecimal inUsd = priceService.convertToUsd(toConvert, from);
+
 		for (int i = 0; i < numbers.size(); i++) {
 			if (i == activeRow)
 				continue;
 
 			String to = combos.get(i).getValue();
-
-			BigDecimal inBtc = priceService.convertToUsd(toConvert, from);
-			BigDecimal converted = priceService.convertFromUsd(inBtc, to);
+			BigDecimal converted = priceService.convertFromUsd(inUsd, to);
 
 			numbers.get(i).setValue(converted.doubleValue());
 		}
