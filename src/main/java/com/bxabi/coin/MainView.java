@@ -93,7 +93,7 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		// NumberField numField =
 		addRow("BTC", 1d);
 		addRow("USDT", null);
-		addRow("EURX", null);
+                addRow("EURT", null);
 		addRow("ETH", null);
 
 		// numField.setValue(1d);
