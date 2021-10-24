@@ -137,12 +137,18 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		cmc.setTarget("_blank");
 		paragraph.add(cmc);
 		footer.add(paragraph);
+		Anchor github = new Anchor("https://github.com/bxabi/crypto-converter", "GitHub");
+		github.setTarget("_blank");
 
 		footer.add(new Html(
 				"<p>Icon made by <a target='_blank' href=\"https://www.freepik.com/\" title=\"Freepik\">Freepik</a> from <a target='_blank' href=\"https://www.flaticon.com/\""
 						+ "      title=\"Flaticon\">www.flaticon.com</a> is licensed by <a href=\"http://creativecommons.org/licenses/by/3.0/\"       "
 						+ "          title=\"Creative Commons BY 3.0\" target=\"_blank\">CC 3.0 BY</a></p>"));
 		add(footer);
+
+		Paragraph paragraph1 = new Paragraph();
+		paragraph1.add(github);
+		footer.add(paragraph1);
 
 		add(new H4("The page is under development, use it at your own risk."));
 	}
