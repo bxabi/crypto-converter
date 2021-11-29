@@ -10,8 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +23,8 @@ import com.bxabi.coin.data.CoinDataCG;
 @Component
 public class PriceServiceCG {
 
-	// BTC, <bitcoin, X>
-	private Map<String, Pair<String, BigDecimal>> mapping = new TreeMap<>();
+	private Map<String, Coin> coins = new TreeMap<>();
+	private Map<String, BigDecimal> prices = new HashMap<>();
 
 	private Date lastUpdated;
 
@@ -40,7 +38,7 @@ public class PriceServiceCG {
 
 		CoinDataCG[] coinData = response.getBody();
 		for (CoinDataCG data : coinData) {
-			mapping.put(data.getSymbol().toUpperCase(), new MutablePair<String, BigDecimal>(data.getId(), null));
+			coins.put(data.getId(), new Coin(data.getName(), data.getSymbol().toUpperCase()));
 		}
 		// refreshPrices();
 	}
@@ -55,12 +53,9 @@ public class PriceServiceCG {
 	}
 
 	public void loadCgPrices(List<String> coins) {
-		StringBuilder coinList=new StringBuilder();
-		Map<String, String> coinmap = new HashMap<>();
-		for (String coin : coins) {
-			String id=mapping.get(coin).getKey();
-			coinmap.put(id, coin);
-			coinList.append(id);
+		StringBuilder coinList = new StringBuilder();
+		for (String coinId : coins) {
+			coinList.append(coinId);
 			coinList.append(",");
 		}
 		coinList.deleteCharAt(coinList.length() - 1);
@@ -74,13 +69,16 @@ public class PriceServiceCG {
 		ResponseEntity<Map<String, Map<String, BigDecimal>>> response = restTemplate.exchange(uri.toUriString(),
 				HttpMethod.GET, null, responseType);
 
-		synchronized (mapping) {
-			Map<String, Map<String, BigDecimal>> prices = response.getBody();
-			for (Entry<String, Map<String, BigDecimal>> entry : prices.entrySet()) {
-				Pair<String, BigDecimal> inMapping = mapping.get(coinmap.get(entry.getKey()));
-				inMapping.setValue(entry.getValue().get("usd"));
+		synchronized (prices) {
+			Map<String, Map<String, BigDecimal>> loadedPrices = response.getBody();
+			for (Entry<String, Map<String, BigDecimal>> entry : loadedPrices.entrySet()) {
+				prices.put(entry.getKey(), entry.getValue().get("usd"));
 			}
 		}
+	}
+
+	public Coin getCoin(String coinId) {
+		return coins.get(coinId);
 	}
 
 	public BigDecimal convertToUsd(BigDecimal toConvert, String from) {
@@ -94,15 +92,13 @@ public class PriceServiceCG {
 	}
 
 	private BigDecimal getRate(String coin) {
-		synchronized (mapping) {
-			return mapping.get(coin).getValue();
+		synchronized (prices) {
+			return prices.get(coin);
 		}
 	}
 
 	public Set<String> getCoinList() {
-		synchronized (mapping) {
-			return mapping.keySet();
-		}
+		return coins.keySet();
 	}
 
 	public Date getLastUpdated() {

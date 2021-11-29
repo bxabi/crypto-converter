@@ -3,6 +3,7 @@ package com.bxabi.coin;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -13,10 +14,10 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.FocusNotifier;
 import com.vaadin.flow.component.FocusNotifier.FocusEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -48,8 +49,17 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 	private static final long serialVersionUID = -4061880784472661873L;
 
+	private List<String> coinIds = new ArrayList<>(Arrays.asList("bitcoin", "tether", "tether-eurt", "ethereum"));
+
 	private List<NumberField> numbers;
 	private List<ComboBox<String>> combos;
+
+	private ItemLabelGenerator<String> coinLabelGenerator = coinId -> {
+		Coin coin = priceService.getCoin(coinId);
+		if (coin != null)
+			return coin.getName() + " (" + coin.getSymbol() + ")";
+		return "";
+	};
 
 	private int activeRow;
 
@@ -71,13 +81,8 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		settings.addFavIcon("icon", "exchange-512x512.png", "512x512");
 	}
 
-	private static ComponentEventListener<FocusEvent<ComboBox<String>>> focusListener = new ComponentEventListener<FocusNotifier.FocusEvent<ComboBox<String>>>() {
-		private static final long serialVersionUID = -8266280287827257045L;
-
-		@Override
-		public void onComponentEvent(FocusEvent<ComboBox<String>> event) {
-			event.getSource().setValue("");
-		}
+	private static ComponentEventListener<FocusEvent<ComboBox<String>>> focusListener = event -> {
+		event.getSource().setValue("");
 	};
 
 	public MainView(@Autowired PriceServiceCG priceService) {
@@ -90,24 +95,18 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		rows = new Div();
 		add(rows);
-		// NumberField numField =
-		addRow("BTC", 1d);
-		addRow("USDT", null);
-                addRow("EURT", null);
-		addRow("ETH", null);
 
-		// numField.setValue(1d);
-		activeRow=0;
-		// calculateValues();
+		for (String id : coinIds) {
+			addRow(id, null);
+		}
+		numbers.get(0).setValue(1d);
+
+		activeRow = 0;
 
 		Button button = new Button("Add more");
-		ComponentEventListener<ClickEvent<Button>> listener = new ComponentEventListener<ClickEvent<Button>>() {
-			private static final long serialVersionUID = -8390552027110773465L;
-
-			@Override
-			public void onComponentEvent(ClickEvent<Button> event) {
-				addRow("", null);
-			}
+		ComponentEventListener<ClickEvent<Button>> listener = event -> {
+			coinIds.add(null);
+			addRow("", null);
 		};
 		button.addClickListener(listener);
 		add(button);
@@ -160,19 +159,14 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		H4 contact = new H4(contactLabel, emailbutton);
 		footer.add(contact);
 
-		ComponentEventListener<ClickEvent<Button>> emailListener = new ComponentEventListener<ClickEvent<Button>>() {
-			private static final long serialVersionUID = -3293472377300681191L;
-
-			@Override
-			public void onComponentEvent(ClickEvent<Button> event) {
-				contact.remove(emailbutton);
-				contact.add(link);
-			}
+		ComponentEventListener<ClickEvent<Button>> emailListener = event -> {
+			contact.remove(emailbutton);
+			contact.add(link);
 		};
 		emailbutton.addClickListener(emailListener);
 	}
 
-	private NumberField addRow(String coin, Double value) {
+	private NumberField addRow(String coinId, Double value) {
 		NumberField n1 = new NumberField();
 		n1.setValueChangeMode(ValueChangeMode.EAGER);
 		n1.setStep(0.000000000000000001);
@@ -183,17 +177,19 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 
 		ComboBox<String> c1 = new ComboBox<>(10);
 		c1.setItems(priceService.getCoinList());
-		c1.setValue(coin);
+		c1.setValue(coinId);
 		c1.addFocusListener(focusListener);
 		combos.add(c1);
 
 		n1.addValueChangeListener(new NumberChangeListener(numbers.size() - 1));
-		c1.addValueChangeListener(new NumberChangeListener(combos.size() - 1));
+		c1.addValueChangeListener(new CoinChangeListener(combos.size() - 1));
+
+		c1.setItemLabelGenerator(coinLabelGenerator);
 
 		// n1.setMaxWidth("180px");
-		n1.setWidth("180px");
+		n1.setWidth("200px");
 		// n1.setMinWidth("120px");
-		c1.setWidth("120px");
+		c1.setWidth("200px");
 
 		n1.setValue(value);
 
@@ -237,19 +233,37 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 			if (!event.isFromClient())
 				return;
 
-			if (event.getSource() instanceof NumberField) {
-				activeRow = id;
-			}
+			activeRow = id;
+			calculateValues();
+		}
+	};
+
+	private class CoinChangeListener implements ValueChangeListener<ComponentValueChangeEvent<? extends Component, ?>> {
+
+		private static final long serialVersionUID = 1585978992503311897L;
+
+		private int id;
+
+		public CoinChangeListener(int id) {
+			this.id = id;
+		}
+
+		@Override
+		public void valueChanged(ComponentValueChangeEvent<? extends Component, ?> event) {
+			if (!event.isFromClient())
+				return;
+
+			Object value = event.getValue();
+			if (value != null)
+				coinIds.set(id, event.getValue().toString());
+			else
+				coinIds.set(id, null);
 			calculateValues();
 		}
 	};
 
 	private void calculateValues() {
-		List<String> coins = new ArrayList<>();
-		for (int i = 0; i < numbers.size(); i++) {
-			coins.add(combos.get(i).getValue());
-		}
-		priceService.refreshPrices(coins);
+		priceService.refreshPrices(coinIds);
 		lastPriceUpdate.setText(getLastPriceUpdateText());
 
 		Double value = numbers.get(activeRow).getValue();
@@ -258,17 +272,18 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		}
 
 		BigDecimal toConvert = new BigDecimal(value);
-		String from = combos.get(activeRow).getValue();
+		String from = coinIds.get(activeRow);
 		BigDecimal inUsd = priceService.convertToUsd(toConvert, from);
 
 		for (int i = 0; i < numbers.size(); i++) {
 			if (i == activeRow)
 				continue;
 
-			String to = combos.get(i).getValue();
-			BigDecimal converted = priceService.convertFromUsd(inUsd, to);
-
-			numbers.get(i).setValue(converted.doubleValue());
+			String to = coinIds.get(i);
+			if (to != null) {
+				BigDecimal converted = priceService.convertFromUsd(inUsd, to);
+				numbers.get(i).setValue(converted.doubleValue());
+			}
 		}
 	}
 }
