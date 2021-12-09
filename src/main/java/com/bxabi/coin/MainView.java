@@ -187,9 +187,9 @@ public class MainView extends VerticalLayout implements PageConfigurator {
 		c1.setItemLabelGenerator(coinLabelGenerator);
 
 		// n1.setMaxWidth("180px");
-		n1.setWidth("200px");
+		n1.setWidth("130px");
 		// n1.setMinWidth("120px");
-		c1.setWidth("200px");
+		c1.setWidth("180px");
 
 		n1.setValue(value);
 
