@@ -2,13 +2,12 @@ package com.bxabi.coin;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -23,7 +22,8 @@ import com.bxabi.coin.data.CoinDataCG;
 @Component
 public class PriceServiceCG {
 
-	private Map<String, Coin> coins = new TreeMap<>();
+	private Map<String, Coin> coins = new HashMap<>();
+
 	private Map<String, BigDecimal> prices = new HashMap<>();
 
 	private Date lastUpdated;
@@ -97,8 +97,12 @@ public class PriceServiceCG {
 		}
 	}
 
-	public Set<String> getCoinList() {
-		return coins.keySet();
+	public List<String> getCoinList() {
+		List<String> list = new ArrayList<>(coins.keySet());
+		list.sort((String a, String b) -> {
+			return coins.get(a).getName().compareTo(coins.get(b).getName());
+		});
+		return list;
 	}
 
 	public Date getLastUpdated() {
