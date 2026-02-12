@@ -29,26 +29,21 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.AppShellSettings;
-import com.vaadin.flow.server.PWA;
-
-@PWA(name = "CryptoCurrency Converter", shortName = "Crypto Conv.", iconPath = "exchange.png")
-@Push
 
 @Route
 @PageTitle("Online CryptoCurrency Converter")
-public class MainView extends VerticalLayout implements AppShellConfigurator {
+public class MainView extends VerticalLayout {
 
     private PriceServiceCG priceService;
 
     private static final long serialVersionUID = -4061880784472661873L;
 
-    private List<String> coinIds = new ArrayList<>(Arrays.asList("bitcoin", "tether", "tether-eurt", "ethereum"));
+    private List<String> coinIds = new ArrayList<>(Arrays.asList("bitcoin", "tether", "euro-coin", "ethereum"));
 
     private List<NumberField> numbers;
     private List<ComboBox<String>> combos;
@@ -69,16 +64,7 @@ public class MainView extends VerticalLayout implements AppShellConfigurator {
     private static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
     static {
         DATEFORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    @Override
-    public void configurePage(AppShellSettings settings) {
-        settings.addMetaTag("description", "Online Cryptocurrency Converter");
-
-        settings.addFavIcon("icon", "exchange.svg", "");
-        settings.addFavIcon("icon", "exchange-512x512.png", "");
-        settings.addFavIcon("icon", "exchange-512x512.png", "512x512");
-    }
+    }    
 
     /*private static ComponentEventListener<FocusEvent<ComboBox<String>>> focusListener = event -> {
     	lastCoin = event.getSource().getValue();

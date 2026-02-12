@@ -42,3 +42,5 @@ mvnw.cmd
 
 frontend
 
+/*.ts
+/tsconfig.json

@@ -38,7 +38,7 @@ public class PriceServiceCG {
     public PriceServiceCG() {
         final RestTemplate restTemplate = new RestTemplate();
 
-        UriComponents uri = UriComponentsBuilder.fromHttpUrl("https://api.coingecko.com/api/v3/coins/list")
+        UriComponents uri = UriComponentsBuilder.fromUriString("https://api.coingecko.com/api/v3/coins/list")
             .build();
 
         ResponseEntity<CoinDataCG[]> response = restTemplate.exchange(uri.toUriString(), HttpMethod.GET, null, CoinDataCG[].class);
@@ -79,7 +79,7 @@ public class PriceServiceCG {
         rf.setReadTimeout(5000);
         rf.setConnectTimeout(5000);
 
-        UriComponents uri = UriComponentsBuilder.fromHttpUrl("https://api.coingecko.com/api/v3/simple/price")
+        UriComponents uri = UriComponentsBuilder.fromUriString("https://api.coingecko.com/api/v3/simple/price")
             .queryParam("ids", coinList)
             .queryParam("vs_currencies", "usd")
             .build();

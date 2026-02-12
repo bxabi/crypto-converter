@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.5</version>
+		<version>4.0.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.bxabi.coin</groupId>
@@ -14,8 +14,8 @@
 	<name>crypto-converter</name>
 	<description>Cryptocurrency Converter</description>
 	<properties>
-		<java.version>17</java.version>
-		<vaadin.version>24.0.0</vaadin.version>
+		<java.version>25</java.version>
+		<vaadin.version>25.0.5</vaadin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -25,6 +25,11 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+    		<groupId>com.vaadin</groupId>
+    		<artifactId>vaadin-dev</artifactId>
+    		<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -47,7 +52,7 @@
 				<version>${vaadin.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
+			</dependency>			
 		</dependencies>
 	</dependencyManagement>
 

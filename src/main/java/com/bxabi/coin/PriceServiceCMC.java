@@ -52,7 +52,7 @@ public class PriceServiceCMC {
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
 
 		UriComponents uri = UriComponentsBuilder
-				.fromHttpUrl("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest")
+				.fromUriString("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest")
 				.queryParam("limit", 500).build();
 		// .queryParam("convert", "EUR"); // ,YEN,etc
 
