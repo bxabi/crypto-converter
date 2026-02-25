@@ -3,3 +3,5 @@ A web page which can also be installed as mobile app for converting between cryp
 Live at: [https://crypto-converter.bxabi.com](https://crypto-converter.bxabi.com)
 
 Made with Spring Boot and Vaadin Flow. Prices from CoinGecko API.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/bxabi/crypto-converter)
